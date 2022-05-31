@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -10,7 +8,7 @@ public class MainManager : MonoBehaviour
     public int LineCount = 6;
     public Rigidbody Ball;
 
-    public Text ScoreText;
+    public Text ScoreText, BestScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -19,7 +17,6 @@ public class MainManager : MonoBehaviour
     private bool m_GameOver = false;
 
     
-    // Start is called before the first frame update
     void Start()
     {
         const float step = 0.6f;
@@ -36,6 +33,8 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        BestScoreText.text = $"Best Score : {PlayerData.Ins.playerName} : {PlayerData.Ins.topScore}";
     }
 
     private void Update()
@@ -56,9 +55,7 @@ public class MainManager : MonoBehaviour
         else if (m_GameOver)
         {
             if (Input.GetKeyDown(KeyCode.Space))
-            {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-            }
+                SceneManager.LoadScene(1, LoadSceneMode.Single);
         }
     }
 
@@ -72,5 +69,14 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+
+        var data = PlayerData.Ins;
+        data.lastScore = m_Points;
+        data.topScore = Mathf.Max(data.topScore, m_Points);
+        data.Save();
+
+        BestScoreText.text = $"Best Score : {data.playerName} : {data.topScore}";
+
+        SceneManager.LoadScene(2, LoadSceneMode.Additive);
     }
 }
